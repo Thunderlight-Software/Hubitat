@@ -38,8 +38,6 @@ def setIPAddress(String ipAddress) {
 def parse(String msg) {
     def resp = hubitat.helper.HexUtils.hexStringToByteArray(msg) 
     if (resp[0] != (byte) 0x081) return;
-    sendEvent(name: "switch", value: resp[2] == 0x23 ? "on" : "off")
-    sendEvent(name: "colorMode", value:"RGB")
     def red = resp[6] & 0xff
     def green = resp[7] & 0xff
     def blue = resp[8] & 0xff
@@ -48,6 +46,8 @@ def parse(String msg) {
     state.hue = hsv[0]
     state.saturation = hsv[1]
     state.level = hsv[2]
+    sendEvent(name: "switch", value: resp[2] == 0x23 ? "on" : "off")
+    sendEvent(name: "colorMode", value:"RGB")
     sendEvent(name: "saturation",value: state.saturation)
     sendEvent(name: "hue",value: state.hue)
     sendEvent(name: "level",value: state.level)
@@ -93,6 +93,9 @@ def socketStatus(String msg) {
 def sendColor(hsv) {
     def rgb = hubitat.helper.ColorUtils.hsvToRGB(hsv)
     Cmd = [ 0x31, (byte)(rgb[0] & 0xff),(byte)(rgb[1] & 0xff),(byte)(rgb[2] & 0xff), 0x00, (byte) 0x0f, 0x0f ] as byte[];
+    state.hue = hsv[0]
+    state.saturation = hsv[1]
+    state.level = hsv[2]
     sendMsg(Cmd)
 }
 
